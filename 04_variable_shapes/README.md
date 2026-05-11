@@ -52,6 +52,17 @@ To handle variable numbers of requests per batch (dynamic batching), the server 
 ##### 5. Execution and Post-processing
 JAX receives the fixed shape `8x128` and retrieves the pre-compiled graph from the cache (or compiles it once if not cached). After execution, the server removes the padding and returns the results with their original lengths to the client.
 
+#### 3D Padding Visualization
+
+While the code in `serve.py` pads tensors directly to the bucket size, conceptually there are three dimensions of padding occurring:
+1. **Tensor Size Alignment**: Shorter tensors are conceptually aligned to the size of the largest tensor in the batch to enable batch processing.
+2. **Bucket Padding**: The tensors are further padded to the next available precompiled bucket size to avoid triggering JAX recompilation.
+3. **Batch Index Padding**: The entire batch is padded with dummy requests to match the fixed `MAX_BATCH_SIZE`, handling variable load.
+
+Here is a visualization of the three dimensions of padding described above:
+
+![Handling Dynamic Shapes](image.png)
+
 ---
 
 ### Summary of the Pattern
